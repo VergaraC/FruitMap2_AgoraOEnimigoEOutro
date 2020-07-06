@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Button, KeyboardAvoidingView, Platform, Text, StyleSheet, Image, TextInput, TouchableOpacity} from 'react-native';
-import { Location, Permission } from 'expo';
+import * as Location from 'expo-location';
+import { Permissions } from 'expo-permissions'
 
 import logoImg from '../assets/logo.png'
 
@@ -23,29 +24,57 @@ if (!firebase.apps.length){
 class Login extends React.Component{
 
   state = {
+    location: {},
     latitude: null,
     longitude: null
-  };
-
-  findCurrentLocation = () => {
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        const latitude = JSON.stringify(position.coords.latitude);
-        const longitude = JSON.stringify(position.coords.longitude);
-
-        this.setState({
-          latitude,
-          longitude
-        });
-      },
-      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-    );
   }
 
-  login(email, password){
+  componentWillMount(){
+    this._getLocation();
+  }
+
+  _getLocation = async () => {
+    const { status } = await Location.requestPermissionsAsync();
+
+    if (status !== 'granted') {
+      setErrorMsg('Permission to access location was denied');
+    }
+
+    let location = await Location.getCurrentPositionAsync({});
+
+    this.setState({
+      location: location,
+      latitude: location.coords.latitude,
+      longitude: location.coords.longitude
+    })
+  }
+
+  // state = {
+  //   latitude: null,
+  //   longitude: null
+  // };
+
+  // findCurrentLocation = () => {
+  //   navigator.geolocation.getCurrentPosition(
+  //     position => {
+  //       const latitude = JSON.stringify(position.coords.latitude);
+  //       const longitude = JSON.stringify(position.coords.longitude);
+
+  //       this.setState({
+  //         latitude,
+  //         longitude
+  //       });
+  //     },
+  //     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+  //   );
+  // }
+
+  login(email, password, latitude, longitude){
     firebase.database().ref('trees/').push({
       email,
       password,
+      latitude,
+      longitude
     }).then((data) => {
       console.log('data ' + data)
     }).catch((error) => {
@@ -53,41 +82,41 @@ class Login extends React.Component{
     })
   }
 
-    render(){
-        return(
-            <KeyboardAvoidingView enabled={Platform.OS === 'ios'} behavior="padding" style={styles.container}>
-                <Image source={logoImg} style={styles.img}/>
+  render(){
+      return(
+          <KeyboardAvoidingView enabled={Platform.OS === 'ios'} behavior="padding" style={styles.container}>
+              <Image source={logoImg} style={styles.img}/>
 
-                <View style={styles.form}>
-                  <Text>My Location is {this.state.latitude}, {this.state.longitude}</Text>
-                  <Text style={styles.label}>SEU E-MAIL *</Text>
-                  <TextInput
-                  style={styles.input}
-                  placeholder="Seu e-mail"
-                  placeholderTextColor="#999"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  onChangeText = {(email) => this.setState({email})}
-                  />
+              <View style={styles.form}>
+                <Text>My Location is {this.state.latitude}, {this.state.longitude}</Text>
+                <Text style={styles.label}>SEU E-MAIL *</Text>
+                <TextInput
+                style={styles.input}
+                placeholder="Seu e-mail"
+                placeholderTextColor="#999"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                autoCorrect={false}
+                onChangeText = {(email) => this.setState({email})}
+                />
 
-                  <Text style={styles.label}>Senha</Text>
-                  <TextInput
-                  style={styles.input}
-                  placeholder="Password"
-                  placeholderTextColor="#999"
-                  autoCapitalize="words"
-                  autoCorrect={false}
-                  onChangeText = {(password) => this.setState({password})}
-                  />
+                <Text style={styles.label}>Senha</Text>
+                <TextInput
+                style={styles.input}
+                placeholder="Password"
+                placeholderTextColor="#999"
+                autoCapitalize="words"
+                autoCorrect={false}
+                onChangeText = {(password) => this.setState({password})}
+                />
 
-                  <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.navigate("Homepage")}/*onPress={() => this.login(this.state.email, this.state.password)}*/>
-                  <Text style={styles.buttonText}>Encontrar spots</Text>
-                  </TouchableOpacity>
-                </View>
-            </KeyboardAvoidingView>
-        );
-    }
+                <TouchableOpacity style={styles.button} /*onPress={() => this.props.navigation.navigate("Login")}*/onPress={() => this.login(this.state.email, this.state.password, this.state.latitude, this.state.longitude)}>
+                <Text style={styles.buttonText}>Encontrar spots</Text>
+                </TouchableOpacity>
+              </View>
+          </KeyboardAvoidingView>
+      );
+  }
     
 }
 
