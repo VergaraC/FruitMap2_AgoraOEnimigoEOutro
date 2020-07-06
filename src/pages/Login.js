@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Button, KeyboardAvoidingView, Platform, Text, StyleSheet, Image, TextInput, TouchableOpacity} from 'react-native';
 
-import logoImg from '../assets/logo.png'
+import logoImg from '../assets/cherry.png'
 
 class Login extends React.Component{
     render(){

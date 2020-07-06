@@ -6,7 +6,7 @@ import Constants from 'expo-constants';
 import api from '../services/api';
 //import { Location, Permissions } from 'expo';
 
-import logoImg from '../assets/logo.png'
+import logoImg from '../assets/cherry.png'
 
 import * as firebase from 'firebase';
 
@@ -17,8 +17,22 @@ class Homepage extends React.Component{
     counter: 0
   }
 
+
   componentDidMount(){
     this.loadProducts();
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZMV46sJcxT_-a8qmEm9OAUuri58Zlj0w",
+      authDomain: "fruitmapweb.firebaseapp.com",
+      databaseURL: "https://fruitmapweb.firebaseio.com",
+      projectId: "fruitmapweb",
+      storageBucket: "fruitmapweb.appspot.com",
+      messagingSenderId: "378568011848",
+      appId: "1:378568011848:web:c744e3bbb287bc9ce1287d"
+    };
+
+    if (!firebase.apps.length){
+      const app = firebase.initializeApp(firebaseConfig);
+    }
   }
 
   loadProducts = async () =>{
@@ -29,23 +43,17 @@ class Homepage extends React.Component{
     this.setState({ counter: docs.length });
   };
 
-  // componentWillMount(){
-  //   const firebaseConfig = {
-  //     apiKey: "AIzaSyBZMV46sJcxT_-a8qmEm9OAUuri58Zlj0w",
-  //     authDomain: "fruitmapweb.firebaseapp.com",
-  //     databaseURL: "https://fruitmapweb.firebaseio.com",
-  //     projectId: "fruitmapweb",
-  //     storageBucket: "fruitmapweb.appspot.com",
-  //     messagingSenderId: "378568011848",
-  //     appId: "1:378568011848:web:c744e3bbb287bc9ce1287d"
-  //   };
+   componentWillMount(){
 
-  //   if (!firebase.apps.length){
-  //     const app = firebase.initializeApp(firebaseConfig);
-  //   }
-  //}
+  }
+  readUserData() {
+    firebase.database().ref('trees/').once('value', function (snapshot) {
+      console.log(snapshot)
+    });
+  }
 
   render(){
+     this.readUserData();
     return(
       <View style={styles.container}>
         <MapView
