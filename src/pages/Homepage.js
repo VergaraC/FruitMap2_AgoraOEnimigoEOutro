@@ -1,113 +1,145 @@
-import React, { useState, Component } from 'react';
-import { StyleSheet, View, Image, Text, Button } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import Constants from 'expo-constants';
-
-import api from '../services/api';
-//import { Location, Permissions } from 'expo';
+import React from 'react';
+import { View, Button, KeyboardAvoidingView, Platform, Text, StyleSheet, Image, TextInput, TouchableOpacity} from 'react-native';
+import { Location, Permission } from 'expo';
 
 import logoImg from '../assets/logo.png'
 
-import * as firebase from 'firebase';
+import firebase from 'firebase';
 
-
-class Homepage extends React.Component{
-  
-  state = {
-    counter: 0
-  }
-
-  componentDidMount(){
-    this.loadProducts();
-  }
-
-  loadProducts = async () =>{
-    const response = await api.get('/products');
-
-    const { docs } = response.data;
-
-    this.setState({ counter: docs.length });
+const firebaseConfig = {
+    apiKey: "AIzaSyBZMV46sJcxT_-a8qmEm9OAUuri58Zlj0w",
+    authDomain: "fruitmapweb.firebaseapp.com",
+    databaseURL: "https://fruitmapweb.firebaseio.com",
+    projectId: "fruitmapweb",
+    storageBucket: "fruitmapweb.appspot.com",
+    messagingSenderId: "378568011848",
+    appId: "1:378568011848:web:c744e3bbb287bc9ce1287d"
   };
 
-  // componentWillMount(){
-  //   const firebaseConfig = {
-  //     apiKey: "AIzaSyBZMV46sJcxT_-a8qmEm9OAUuri58Zlj0w",
-  //     authDomain: "fruitmapweb.firebaseapp.com",
-  //     databaseURL: "https://fruitmapweb.firebaseio.com",
-  //     projectId: "fruitmapweb",
-  //     storageBucket: "fruitmapweb.appspot.com",
-  //     messagingSenderId: "378568011848",
-  //     appId: "1:378568011848:web:c744e3bbb287bc9ce1287d"
-  //   };
+if (!firebase.apps.length){
+  const app = firebase.initializeApp(firebaseConfig);
+}
+  
+class Login extends React.Component{
 
-  //   if (!firebase.apps.length){
-  //     const app = firebase.initializeApp(firebaseConfig);
-  //   }
-  //}
+  state = {
+    latitude: null,
+    longitude: null
+  };
 
-  render(){
-    return(
-      <View style={styles.container}>
-        <MapView
-        initialRegion={{
-          latitude: -22.2241833,
-          longitude: -54.8121767,
-          latitudeDelta: 0.0042,
-          longitudeDelta: 0.0031,
-        }}
-        showsUserLocation
-        loadingEnabled
-        style={styles.mapView}>
-          <Marker coordinate={{
-            latitude: -22.2241833,
-            longitude: -54.8121767
-          }}>
+  findCurrentLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      position => {
+        const latitude = JSON.stringify(position.coords.latitude);
+        const longitude = JSON.stringify(position.coords.longitude);
 
-        </Marker>
-
-        </MapView>
-
-        <View style={styles.header}>
-          <Image source={logoImg} style={styles.image}/>
-        <Text>{this.state.counter}</Text>
-        </View>
-
-        <Button title='next' onPress={() => this.props.navigation.navigate("Login")} style={styles.button}/>
-      </View>
+        this.setState({
+          latitude,
+          longitude
+        });
+      },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
     );
   }
-}
 
-export default Homepage;
-
-const styles = StyleSheet.create({
-  mapView: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-  },
-
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: Constants.statusBarHeight + 20
-  },
-
-  header: {
-    flexDirection: "row",
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: "#f0f0f0",
-    borderWidth: 2,
-    borderRadius: 8,
-    borderColor: "#dbdbdb"
-  },
-
-  image: {
-    width: 132.6,
-    height: 89.2
+  login(email, password){
+    firebase.database().ref('trees/').push({
+      email,
+      password,
+    }).then((data) => {
+      console.log('data ' + data)
+    }).catch((error) => {
+      console.log('error', error)
+    })
   }
 
-});
+    render(){
+        return(
+            <KeyboardAvoidingView enabled={Platform.OS === 'ios'} behavior="padding" style={styles.container}>
+                <Image source={logoImg} style={styles.img}/>
+
+                <View style={styles.form}>
+                  <Text>My Location is {this.state.latitude}, {this.state.longitude}</Text>
+                  <Text style={styles.label}>SEU E-MAIL *</Text>
+                  <TextInput
+                  style={styles.input}
+                  placeholder="Seu e-mail"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  onChangeText = {(email) => this.setState({email})}
+                  />
+
+                  <Text style={styles.label}>Senha</Text>
+                  <TextInput
+                  style={styles.input}
+                  placeholder="Password"
+                  placeholderTextColor="#999"
+                  autoCapitalize="words"
+                  autoCorrect={false}
+                  onChangeText = {(password) => this.setState({password})}
+                  />
+
+                  <TouchableOpacity style={styles.button} onPress={() => this.props.navigation.navigate("Homepage")}/*onPress={() => this.login(this.state.email, this.state.password)}*/>
+                  <Text style={styles.buttonText}>Encontrar spots</Text>
+                  </TouchableOpacity>
+                </View>
+            </KeyboardAvoidingView>
+        );
+    }
+    
+}
+
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center'
+    },
+
+    img : {
+        width: 265.2,
+        height: 178.4
+    },
+  
+    form: {
+      alignSelf: 'stretch',
+      paddingHorizontal: 30,
+      marginTop: 30,
+    },
+  
+    label: {
+      fontWeight: 'bold',
+      color: '#444',
+      marginBottom: 8,
+    },
+  
+    input: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      paddingHorizontal: 20,
+      fontSize: 16,
+      color: '#444',
+      height: 44,
+      marginBottom: 20,
+      borderRadius: 2
+    },
+  
+    button: {
+      height: 42,
+      backgroundColor: '#f05a5b',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderRadius: 2,
+    },
+  
+    buttonText: {
+      color: '#FFF',
+      fontWeight: 'bold',
+      fontSize: 16,
+    },
+  });
+
+export default Login;
