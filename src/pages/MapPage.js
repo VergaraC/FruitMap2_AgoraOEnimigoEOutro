@@ -22,22 +22,10 @@ if (!firebase.apps.length){
 }
 
 class MapPage extends React.Component{
-  
   state = {
-    trees: [],
-    latitude: null,
-    longitude: null
+    locations: [],
   }
 
-  // componentDidMount() {
-  //   firebase.database().ref("trees").on("value", datasnapshot => {
-  //     console.log( datasnapshot.val())
-  //     this.setState({
-  //     trees: datasnapshot.val()
-  //   })
-  //   })
-  // }
-    
   render(){
     return(
       <SafeAreaView style={styles.container}>
@@ -53,9 +41,43 @@ class MapPage extends React.Component{
         style={styles.mapView}>
           
           {
-            // this.state.trees.map(marker =>{
+            firebase.database().ref("trees").once("value",snapshot =>{
+              
+              var markers = []
 
-            // })
+              snapshot.forEach(function(tree){
+                var lat = tree.val().lat;
+                var longi = tree.val().longi;
+
+                // console.log(lat)
+                // console.log(long)
+
+                markers.push(
+                  {
+                    latitude: lat,
+                    longitude: longi
+                  }
+                )
+              })
+
+              this.setState({
+                locations: markers
+              })
+
+              console.log(markers)
+              
+              this.state.locations.map((marker,index) => {
+                <MapView.Marker
+                    key={index}
+                    coordinate={{
+                      latitude: marker.latitude,
+                      longitude: marker.longitude
+                    }}
+                />
+             })
+
+             console.log(state)
+            })
           }
 
         </MapView>
