@@ -1,7 +1,6 @@
 import React from 'react';
 import { View, Button, KeyboardAvoidingView, Platform, Text, StyleSheet, Image, TextInput, TouchableOpacity} from 'react-native';
 import * as Location from 'expo-location';
-import { Permissions } from 'expo-permissions'
 
 import logoImg from '../assets/logo.png'
 
@@ -21,7 +20,7 @@ if (!firebase.apps.length){
   const app = firebase.initializeApp(firebaseConfig);
 }
   
-class Login extends React.Component{
+class Homepage extends React.Component{
 
   state = {
     location: {},
@@ -48,26 +47,6 @@ class Login extends React.Component{
       longitude: location.coords.longitude
     })
   }
-
-  // state = {
-  //   latitude: null,
-  //   longitude: null
-  // };
-
-  // findCurrentLocation = () => {
-  //   navigator.geolocation.getCurrentPosition(
-  //     position => {
-  //       const latitude = JSON.stringify(position.coords.latitude);
-  //       const longitude = JSON.stringify(position.coords.longitude);
-
-  //       this.setState({
-  //         latitude,
-  //         longitude
-  //       });
-  //     },
-  //     { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-  //   );
-  // }
 
   login(email, password, latitude, longitude){
     firebase.database().ref('trees/').push({
@@ -110,7 +89,7 @@ class Login extends React.Component{
                 onChangeText = {(password) => this.setState({password})}
                 />
 
-                <TouchableOpacity style={styles.button} /*onPress={() => this.props.navigation.navigate("Login")}*/onPress={() => this.login(this.state.email, this.state.password, this.state.latitude, this.state.longitude)}>
+                <TouchableOpacity style={styles.button} /*onPress={() => this.props.navigation.navigate("Login")}*/onPress={() => { this.login(this.state.email, this.state.password, this.state.latitude, this.state.longitude); this.props.navigation.navigate("Login"); } }>
                 <Text style={styles.buttonText}>Encontrar spots</Text>
                 </TouchableOpacity>
               </View>
@@ -171,4 +150,4 @@ const styles = StyleSheet.create({
     },
   });
 
-export default Login;
+export default Homepage;
